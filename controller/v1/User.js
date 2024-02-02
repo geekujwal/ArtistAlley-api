@@ -2,6 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { RequestRegisterToken } = require("../../service/UserService");
 
-router.post("/", RequestRegisterToken);
+router.get("/", RequestRegisterToken);
 
 module.exports = router;
