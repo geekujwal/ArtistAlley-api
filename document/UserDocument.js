@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { UserType } = require("../contract/UserType");
 
 const User = mongoose.Schema({
     id: String,
@@ -7,6 +8,11 @@ const User = mongoose.Schema({
     email: String,
     password: String,
     avatar: String,
+    type: {
+        type: String,
+        enum: Object.values(UserType), 
+        default: UserType.USER
+    },
     created: Date
 })
 
