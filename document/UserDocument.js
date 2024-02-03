@@ -11,7 +11,7 @@ const User = mongoose.Schema({
     type: {
         type: String,
         enum: Object.values(UserType), 
-        default: UserType.USER
+        default: UserType.TEMPORARY
     },
     created: Date
 })

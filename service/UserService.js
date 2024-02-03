@@ -6,7 +6,7 @@ const { CreateVerificationToken } = require("./VerificationService");
 
 
 exports.RequestRegisterToken = async (req, res, next) => {
-    const { username, name, email, password } = req.body;
+    const { username, email } = req.body;
     try {
         const user = await UserDocument.findOne(
             {
@@ -40,6 +40,17 @@ exports.VerifyToken = async (req, res, next) => {
     const { token, email } = req.body;
     try {
 
+    } catch (err) {
+        console.log(err)
+        logger.error("An error occuried while verifying user token ", err)
+        res.status(400).send('An error occuried while verifying user token');
+    }
+}
+
+exports.CompleteRegistration = async (req, res, next) => {
+    const { password, email, name } = req.body;
+    try {
+        // todo search user using his/her email and update its name and password with hash also change user's account type to user (before it was temp user)
     } catch (err) {
         console.log(err)
         logger.error("An error occuried while verifying user token ", err)

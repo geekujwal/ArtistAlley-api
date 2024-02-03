@@ -1,6 +1,5 @@
 exports.generateVerificationToken = () =>
 {
-
     const min = 100000;
     const max = 999999; 
 

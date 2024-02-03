@@ -1,4 +1,5 @@
 exports.UserType = {
     ADMIN: 'admin',
-    USER: 'user'
+    USER: 'user',
+    TEMPORARY: "temporary"
   };
