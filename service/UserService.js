@@ -3,6 +3,8 @@ const { Messages } = require("../common/Message");
 const { UserDocument } = require("../document/UserDocument");
 const { v4: uuidv4 } = require('uuid');
 const { CreateVerificationToken } = require("./VerificationService");
+const { sendMail } = require('../extension/SendMail');
+const { OTPTemplate } = require('../template/otptemplate');
 
 
 exports.RequestRegisterToken = async (req, res, next) => {
@@ -26,8 +28,9 @@ exports.RequestRegisterToken = async (req, res, next) => {
         })        
 
         await newUser.save()
-        await CreateVerificationToken(email);
+        const otpToken = await CreateVerificationToken(email);
         // todo create notification document to store it and send email/ sms later
+        await sendMail(email, OTPTemplate.SubjectPart, OTPTemplate.HTMLPart(otpToken));
         return res.status(204).send();
     } catch (err) {
         console.log(err)

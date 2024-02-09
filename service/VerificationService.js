@@ -8,12 +8,13 @@ exports.CreateVerificationToken = async (email) => {
     const verificationdoc = await UserVerificationDocument.findOne(
         { email }
     );
+    const verifyToken = generateVerificationToken()
     if (verificationdoc) {
         logger.info("Verification token document already exists")
         // remove old tokens and add new one
         verificationdoc.lastAttemptAt = new Date().toUTCString()
         verificationdoc.token = [{
-            token: generateVerificationToken(),
+            token: verifyToken,
             createdAt: new Date().toUTCString()
         }]
         verificationdoc.totalAttemps = 0;
@@ -27,7 +28,7 @@ exports.CreateVerificationToken = async (email) => {
             email: email,
             lastAttemptAt: new Date().toUTCString(),
             token: [{
-                token: generateVerificationToken(),
+                token: verifyToken,
                 createdAt: new Date().toUTCString()
             }],
             totalAttemps: 0,
@@ -36,5 +37,5 @@ exports.CreateVerificationToken = async (email) => {
         await verification.save();
     }
     logger.info(`Verification token creating process ended`)
-    return;
+    return verifyToken;
 }
