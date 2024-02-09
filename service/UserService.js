@@ -1,13 +1,14 @@
 const logger = require('pino')()
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const { Messages } = require("../common/Message");
 const { UserDocument } = require("../document/UserDocument");
-const { v4: uuidv4 } = require('uuid');
 const { CreateVerificationToken, VerifyUserToken } = require("./VerificationService");
 const { sendMail } = require('../extension/SendMail');
 const { OTPTemplate } = require('../template/otptemplate');
 const { UserType } = require('../contract/UserType');
-const { UserVerificationDocument } = require('../document/userVerificationDocument');
 const { EncryptPassword, VerifyPassword } = require('../extension/PasswordEncryption');
+
 
 
 exports.RequestRegisterToken = async (req, res, next) => {
@@ -23,8 +24,6 @@ exports.RequestRegisterToken = async (req, res, next) => {
         if (user && user.type !== UserType.TEMPORARY) {
             return res.status(400).json({ message: Messages.userAlreadyExist })
         }
-        // todo if user document isnt already there create it
-        // todo else update previous user document
         // todo add more log
         if (!user) {
             var newUser = new UserDocument({
@@ -91,14 +90,27 @@ exports.Login = async (req, res, next) => {
             { type: type.toLowerCase() } // should we check for type here or later ? idk what is better need to think about it in future
         ]
     })
-    // todo how many fail attemp are we gonna give to user? how long will user be unable to login after x number of failed attempted?
+    // todo how many fail attemps are we gonna give to user? how long will user be unable to login after x number of failed attempted?
+    // todo If failed attempt reach maximum send an email to user informing them when they can retry again or reset their password
     if (!user || !await VerifyPassword(password, user.password)) {
         console.log("user status: ", user, await VerifyPassword(password, user.password))
         return res.status(404).json({
             message: Messages.userNotFound
         })
     }
-    return res.status(200).json({
-        message: user
-    })
+    const payload = {
+        user: {
+          id: user.id,
+          type: user.type
+        }
+      };
+      jwt.sign(
+        payload,
+        "" + process.env.JWTSECRET,
+        { expiresIn: process.env.JWTEXPIRESIN },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ accessToken: token });
+        }
+      );
 }
