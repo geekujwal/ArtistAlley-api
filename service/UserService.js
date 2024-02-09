@@ -24,14 +24,21 @@ exports.RequestRegisterToken = async (req, res, next) => {
         // todo if user document isnt already there create it
         // todo else update previous user document
         // todo add more log
-        var newUser = new UserDocument({
-            id: uuidv4(),
-            username: username.toLowerCase(),
-            email: email.toLowerCase(),
-            created: new Date().toUTCString()
-        })        
-
-        await newUser.save()
+        if(!user)
+        {
+            var newUser = new UserDocument({
+                id: uuidv4(),
+                username: username.toLowerCase(),
+                email: email.toLowerCase(),
+                created: new Date().toUTCString()
+            })        
+    
+            await newUser.save()
+        }else {
+            user.username = username.toLowerCase()
+            user.created = new Date().toUTCString()
+            user.save()
+        }
         const otpToken = await CreateVerificationToken(email);
         // todo create notification document to store it and send email/ sms later
         await sendMail(email, OTPTemplate.SubjectPart, OTPTemplate.HTMLPart(otpToken));
