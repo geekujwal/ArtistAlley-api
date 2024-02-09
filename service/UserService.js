@@ -91,7 +91,7 @@ exports.Login = async (req, res, next) => {
             { type: type.toLowerCase() } // should we check for type here or later ? idk what is better need to think about it in future
         ]
     })
-    // how many fail attemp are we gonna give to user? how long will user be unable to login after x number of failed attempted?
+    // todo how many fail attemp are we gonna give to user? how long will user be unable to login after x number of failed attempted?
     if (!user || !await VerifyPassword(password, user.password)) {
         console.log("user status: ", user, await VerifyPassword(password, user.password))
         return res.status(404).json({
