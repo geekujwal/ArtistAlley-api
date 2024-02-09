@@ -10,7 +10,6 @@ const { UserType } = require('../contract/UserType');
 const { EncryptPassword, VerifyPassword } = require('../extension/PasswordEncryption');
 
 
-
 exports.RequestRegisterToken = async (req, res, next) => {
     const { username, email } = req.body;
     try {
