@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const { CreateVerificationToken } = require("./VerificationService");
 const { sendMail } = require('../extension/SendMail');
 const { OTPTemplate } = require('../template/otptemplate');
+const { UserType } = require('../contract/UserType');
 
 
 exports.RequestRegisterToken = async (req, res, next) => {
@@ -17,9 +18,12 @@ exports.RequestRegisterToken = async (req, res, next) => {
                     { email: email }
                 ]
             });
-        if (user) {
+        if (user && user.type !== UserType.TEMPORARY) {
             return res.status(400).json({ message: Messages.userAlreadyExist })
         }
+        // todo if user document isnt already there create it
+        // todo else update previous user document
+        // todo add more log
         var newUser = new UserDocument({
             id: uuidv4(),
             username: username.toLowerCase(),
