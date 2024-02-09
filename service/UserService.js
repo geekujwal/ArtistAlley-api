@@ -80,6 +80,7 @@ exports.CompleteRegistration = async (req, res, next) => {
         user.password = password;
         user.type = UserType.USER;
         user.save()
+        // todo send welcome to artistAlley mail after this process
         return res.status(200).json({
             message: Messages.newUserCreated
         })
