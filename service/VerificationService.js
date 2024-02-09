@@ -39,3 +39,13 @@ exports.CreateVerificationToken = async (email) => {
     logger.info(`Verification token creating process ended`)
     return verifyToken;
 }
+exports.VerifyUserToken = async (email, token) => {
+    const userToken = await UserVerificationDocument.findOne(
+        {
+            email: email
+        });
+    if (userToken && userToken.token.some(item => item.token == token)) {
+        return true;
+    }
+    return false;
+}

@@ -2,10 +2,11 @@ const logger = require('pino')()
 const { Messages } = require("../common/Message");
 const { UserDocument } = require("../document/UserDocument");
 const { v4: uuidv4 } = require('uuid');
-const { CreateVerificationToken } = require("./VerificationService");
+const { CreateVerificationToken, VerifyUserToken } = require("./VerificationService");
 const { sendMail } = require('../extension/SendMail');
 const { OTPTemplate } = require('../template/otptemplate');
 const { UserType } = require('../contract/UserType');
+const { UserVerificationDocument } = require('../document/userVerificationDocument');
 
 
 exports.RequestRegisterToken = async (req, res, next) => {
@@ -24,17 +25,15 @@ exports.RequestRegisterToken = async (req, res, next) => {
         // todo if user document isnt already there create it
         // todo else update previous user document
         // todo add more log
-        if(!user)
-        {
+        if (!user) {
             var newUser = new UserDocument({
                 id: uuidv4(),
                 username: username.toLowerCase(),
                 email: email.toLowerCase(),
                 created: new Date().toUTCString()
-            })        
-    
+            })
             await newUser.save()
-        }else {
+        } else {
             user.username = username.toLowerCase()
             user.created = new Date().toUTCString()
             user.save()
@@ -50,21 +49,40 @@ exports.RequestRegisterToken = async (req, res, next) => {
     }
 }
 
-exports.VerifyToken = async (req, res, next) => {
-    const { token, email } = req.body;
-    try {
+// exports.VerifyToken = async (req, res, next) => {
+//     const { token, email } = req.body;
+//     try {
 
-    } catch (err) {
-        console.log(err)
-        logger.error("An error occuried while verifying user token ", err)
-        res.status(400).send('An error occuried while verifying user token');
-    }
-}
+//     } catch (err) {
+//         console.log(err)
+//         logger.error("An error occuried while verifying user token ", err)
+//         res.status(400).send('An error occuried while verifying user token');
+//     }
+// }
 
 exports.CompleteRegistration = async (req, res, next) => {
-    const { password, email, name } = req.body;
+    const { token, password, email, name } = req.body;
     try {
-        // todo search user using his/her email and update its name and password with hash also change user's account type to user (before it was temp user)
+        const user = await UserDocument.findOne(
+            {
+                email: email
+            });
+        if (user && user.type !== UserType.TEMPORARY) {
+            return res.status(400).json({ message: Messages.userAlreadyExist })
+        }
+        const verifyToken = await VerifyUserToken(user.email, token)
+        if (!verifyToken) {
+            return res.status(400).json({ message: Messages.invalidToken })
+        }
+        user.name = name;
+        // todo encrypt password here 
+        // todo for better use make a utils function for encryption and decryption
+        user.password = password;
+        user.type = UserType.USER;
+        user.save()
+        return res.status(200).json({
+            message: Messages.newUserCreated
+        })
     } catch (err) {
         console.log(err)
         logger.error("An error occuried while verifying user token ", err)
