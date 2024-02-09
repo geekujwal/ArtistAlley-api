@@ -7,6 +7,7 @@ const { sendMail } = require('../extension/SendMail');
 const { OTPTemplate } = require('../template/otptemplate');
 const { UserType } = require('../contract/UserType');
 const { UserVerificationDocument } = require('../document/userVerificationDocument');
+const { EncryptPassword, VerifyPassword } = require('../extension/PasswordEncryption');
 
 
 exports.RequestRegisterToken = async (req, res, next) => {
@@ -38,9 +39,12 @@ exports.RequestRegisterToken = async (req, res, next) => {
             user.created = new Date().toUTCString()
             user.save()
         }
-        const otpToken = await CreateVerificationToken(email);
+        const otpToken = process.env.DEV ? "999999" : await CreateVerificationToken(email);
         // todo create notification document to store it and send email/ sms later
-        await sendMail(email, OTPTemplate.SubjectPart, OTPTemplate.HTMLPart(otpToken));
+        if(!process.env.DEV )
+        {
+            await sendMail(email, OTPTemplate.SubjectPart, OTPTemplate.HTMLPart(otpToken));
+        }
         return res.status(204).send();
     } catch (err) {
         console.log(err)
@@ -48,17 +52,6 @@ exports.RequestRegisterToken = async (req, res, next) => {
         res.status(400).send('An error occuried while verifying user token');
     }
 }
-
-// exports.VerifyToken = async (req, res, next) => {
-//     const { token, email } = req.body;
-//     try {
-
-//     } catch (err) {
-//         console.log(err)
-//         logger.error("An error occuried while verifying user token ", err)
-//         res.status(400).send('An error occuried while verifying user token');
-//     }
-// }
 
 exports.CompleteRegistration = async (req, res, next) => {
     const { token, password, email, name } = req.body;
@@ -75,9 +68,7 @@ exports.CompleteRegistration = async (req, res, next) => {
             return res.status(400).json({ message: Messages.invalidToken })
         }
         user.name = name;
-        // todo encrypt password here 
-        // todo for better use make a extension function for encryption and decryption
-        user.password = password;
+        user.password = await EncryptPassword(password);
         user.type = UserType.USER;
         user.save()
         // todo send welcome to artistAlley mail after this process
@@ -92,7 +83,7 @@ exports.CompleteRegistration = async (req, res, next) => {
 }
 
 exports.Login = async (req, res, next) => {
-    const {email, password, type} = req.body;
+    const { email, password, type } = req.body;
     // todo add try catch
     const user = await UserDocument.findOne({
         $and: [
@@ -100,8 +91,9 @@ exports.Login = async (req, res, next) => {
             { type: type.toLowerCase() } // should we check for type here or later ? idk what is better need to think about it in future
         ]
     })
-
-    if(!user || user.password === password) {
+    // how many fail attemp are we gonna give to user? how long will user be unable to login after x number of failed attempted?
+    if (!user || !await VerifyPassword(password, user.password)) {
+        console.log("user status: ", user, await VerifyPassword(password, user.password))
         return res.status(404).json({
             message: Messages.userNotFound
         })
