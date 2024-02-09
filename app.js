@@ -1,5 +1,6 @@
 const express = require("express");
 const { connectDb } = require("./utils/db");
+require('dotenv').config()
 
 const app = express();
 app.use(express.json({ extended: false }));
@@ -16,7 +17,7 @@ const healthController = require('./controller/v1/Health');
 app.use('/api/v1/user', userController);
 app.use('/api/v1/health', healthController);
 
-const PORT = 8080;
+const PORT = process.env.PORT;
 
 app.use("/", (req, res) => {
     res.status(200).json({
