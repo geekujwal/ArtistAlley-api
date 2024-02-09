@@ -19,12 +19,6 @@ app.use('/api/v1/health', healthController);
 
 const PORT = process.env.PORT;
 
-app.use("/", (req, res) => {
-    res.status(200).json({
-        msg: "ok",
-    });
-});
-
 connectDb();
 app.listen(PORT, () => {
     console.log(`Listening on PORT number ${PORT} working...`);
