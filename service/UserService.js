@@ -76,7 +76,7 @@ exports.CompleteRegistration = async (req, res, next) => {
         }
         user.name = name;
         // todo encrypt password here 
-        // todo for better use make a utils function for encryption and decryption
+        // todo for better use make a extension function for encryption and decryption
         user.password = password;
         user.type = UserType.USER;
         user.save()
