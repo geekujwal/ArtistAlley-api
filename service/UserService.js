@@ -46,8 +46,8 @@ exports.RequestRegisterToken = async (req, res, next) => {
         return res.status(204).send();
     } catch (err) {
         console.log(err)
-        logger.error(`An error occuried while creating user ${err}`)
-        res.status(400).send('An error occuried while verifying user token');
+        logger.error(`server side exception ${err}`)
+        res.status(500).send('server side exception');
     }
 }
 
@@ -75,8 +75,8 @@ exports.CompleteRegistration = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        logger.error("An error occuried while verifying user token ", err)
-        res.status(400).send('An error occuried while verifying user token');
+        logger.error("server side exception ", err)
+        res.status(500).send('server side exception');
     }
 }
 
