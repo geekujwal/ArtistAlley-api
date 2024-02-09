@@ -90,3 +90,23 @@ exports.CompleteRegistration = async (req, res, next) => {
         res.status(400).send('An error occuried while verifying user token');
     }
 }
+
+exports.Login = async (req, res, next) => {
+    const {email, password, type} = req.body;
+    // todo add try catch
+    const user = await UserDocument.findOne({
+        $and: [
+            { email: email },
+            { type: type.toLowerCase() } // should we check for type here or later ? idk what is better need to think about it in future
+        ]
+    })
+
+    if(!user || user.password === password) {
+        return res.status(404).json({
+            message: Messages.userNotFound
+        })
+    }
+    return res.status(200).json({
+        message: user
+    })
+}
