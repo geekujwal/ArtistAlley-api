@@ -12,6 +12,7 @@ exports.CreateVerificationToken = async (email) => {
     if (verificationdoc) {
         logger.info("Verification token document already exists")
         // remove old tokens and add new one
+        // but what we can do instead is make a schduler which will check for expire token and remove them instead of replacing token 
         verificationdoc.lastAttemptAt = new Date().toUTCString()
         verificationdoc.token = [{
             token: verifyToken,
@@ -40,6 +41,7 @@ exports.CreateVerificationToken = async (email) => {
     return verifyToken;
 }
 exports.VerifyUserToken = async (email, token) => {
+    // todo add try catch here also logger
     const userToken = await UserVerificationDocument.findOne(
         {
             email: email
