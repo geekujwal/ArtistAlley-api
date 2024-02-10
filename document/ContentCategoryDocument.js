@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const ContentCategory = mongoose.Schema({
     id: String,
-    name: String,
+    title: String,
     userId: String,
     created: Date
 })
