@@ -15,11 +15,13 @@ const userController = require('./controller/v1/User');
 const healthController = require('./controller/v1/Health');
 const contentController = require('./controller/v1/Content');
 const contentCategoryController = require('./controller/v1/ContentCategory');
+const CommentController = require('./controller/v1/Comment');
 
 app.use('/api/v1/user', userController);
 app.use('/api/v1/health', healthController);
 app.use('/api/v1/contentCategory', contentCategoryController);
 app.use('/api/v1/content', contentController);
+app.use('/api/v1/comment', CommentController);
 
 const PORT = process.env.PORT;
 
