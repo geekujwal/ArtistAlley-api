@@ -37,7 +37,7 @@ exports.RequestRegisterToken = async (req, res, next) => {
             user.created = new Date().toUTCString()
             user.save()
         }
-        const otpToken = process.env.DEV ? "999999" : await CreateVerificationToken(email);
+        const otpToken = await CreateVerificationToken(email);
         // todo create notification document to store it and send email/ sms later
         if(!process.env.DEV )
         {
@@ -46,8 +46,8 @@ exports.RequestRegisterToken = async (req, res, next) => {
         return res.status(204).send();
     } catch (err) {
         console.log(err)
-        logger.error(`An error occuried while creating user ${err}`)
-        res.status(400).send('An error occuried while verifying user token');
+        logger.error(`server side exception ${err}`)
+        res.status(500).send('server side exception');
     }
 }
 
@@ -75,8 +75,8 @@ exports.CompleteRegistration = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        logger.error("An error occuried while verifying user token ", err)
-        res.status(400).send('An error occuried while verifying user token');
+        logger.error("server side exception ", err)
+        res.status(500).send('server side exception');
     }
 }
 
@@ -86,13 +86,11 @@ exports.Login = async (req, res, next) => {
     const user = await UserDocument.findOne({
         $and: [
             { email: email },
-            { type: type.toLowerCase() } // should we check for type here or later ? idk what is better need to think about it in future
         ]
     })
     // todo how many fail attemps are we gonna give to user? how long will user be unable to login after x number of failed attempted?
     // todo If failed attempt reach maximum send an email to user informing them when they can retry again or reset their password
-    if (!user || !await VerifyPassword(password, user.password)) {
-        console.log("user status: ", user, await VerifyPassword(password, user.password))
+    if (!user || !await VerifyPassword(password, user.password) || user.type !== type) {
         return res.status(404).json({
             message: Messages.userNotFound
         })

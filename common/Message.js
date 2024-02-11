@@ -3,5 +3,6 @@ exports.Messages = {
     userAlreadyExist: "User Already exists.",
     invalidToken: "Invalid user token.",
     userNotFound: "User not found.",
-    accessDenied: "No token, authorization denied"
+    accessDenied: "No token, authorization denied",
+    categoryAlreadyExist: "Content category already exists."
 }

@@ -8,7 +8,7 @@ exports.CreateVerificationToken = async (email) => {
     const verificationdoc = await UserVerificationDocument.findOne(
         { email }
     );
-    const verifyToken = generateVerificationToken()
+    const verifyToken = process.env.DEV ? "999999" : generateVerificationToken()
     if (verificationdoc) {
         logger.info("Verification token document already exists")
         // remove old tokens and add new one
